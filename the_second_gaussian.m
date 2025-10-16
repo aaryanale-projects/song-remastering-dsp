@@ -1,4 +1,3 @@
-
 %gaussian filter whole window, 50Hz high pass
 function z = Second_Gaussian(y,Fs)
     w = gausswin(length(y)); % gaussian window
