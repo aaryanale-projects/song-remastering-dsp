@@ -1,38 +1,76 @@
-% main code for generating gaussian filtered samples
-% current functions:
+% =========================================================================
+% Main Script for Generating Gaussian-Filtered Audio Samples
+% =========================================================================
+%
+% This script processes an input audio file and generates a filtered version 
+% of specified duration using various digital filtering techniques.
+%
+% ------------------------------
+% Available Functions:
+% ------------------------------
 %   - Main body function
 %   - Gaussian filter
 %   - Moving Average filter
-%   - low pass filter (non standard definiton, read function header)
-%   - weakest frequency removal filter (read function header)
+%   - Low-pass filter (custom implementation; see function header)
+%   - Weakest-frequency removal filter (see function header)
+%
+% ------------------------------
+% Important Note:
+% ------------------------------
+%   Ensure that N % 4 == 0 for proper indexing and window segmentation.
+%
+% ------------------------------
+% Function Description:
+% ------------------------------
+% The function accepts an input song and produces:
+%   1. A filtered version of the audio signal (of length `l` seconds).
+%   2. A truncated version of the original signal (also `l` seconds) 
+%      for direct comparison.
+%
+% ------------------------------
+% Input Parameters:
+% ------------------------------
+%   > nameIn  
+%       Input audio filename (string)
+%
+%   > nameOut  
+%       Base name for output files. Two files will be generated:
+%         - "nameOut_original.wav" → shortened original audio
+%         - "nameOut_<type>.wav"   → filtered output, where <type> can be 
+%           'gaussian', 'movAv', etc.
+%
+%   > l  
+%       Duration (in seconds) of the audio segment to process.
+%
+%   > windowSize  
+%       Size of the filtering window (integer). Larger windows smooth more aggressively.
+%
+%   > mode  
+%       Integer value between 1 and 2 specifying the primary filtering technique:
+%         1 → Moving Average Filter  
+%         2 → Gaussian Filter
+%
+%   > additionalFilter  
+%       Integer value between 1 and 3 specifying any secondary filter:
+%         1 → No additional filtering  
+%         2 → Low-pass filter (retains a specified fraction of frequencies)  
+%         3 → Weakest-frequency removal filter (removes lowest-amplitude frequencies)
+%
+%   > percentCutoff  
+%       Fraction between 0 and 1 indicating:
+%         - For low-pass filter: proportion of spectrum retained.
+%         - For weakest-frequency removal: proportion of lowest amplitudes to remove.
+%
+%   > LP_dB_Reduction  
+%       Attenuation applied by the low-pass filter (in decibels).  
+%       Example: -20 dB corresponds to a gain factor of 0.1.
+%
+%   > HPCO  
+%       High-pass cutoff frequency (Hz).  
+%       Recommended range: 50–150 Hz (typically around 100 Hz) to eliminate DC offsets.
+%
+% =========================================================================
 
-
-% NOTE: MAKE SURE N%4 = 0 FOR INDEXING REASONS
-
-% >takes in the name of a song and outputs a filtered song of length len in
-% seconds along with a sample of the original with length len for a direct 
-% comparison. 
-% >nameIn is input song name
-% >nameOut is output name of samples to save. Will save two samples: The 
-% >shortened original of form "nameOut_original.wav" , and the filtered 
-% sample of form "nameOut_type.wav", where type is gaussian, movAv, etc
-% l is length of song sample(in seconds)
-% >windowSize is size of filtering window
-% >mode is a number between 1 and 2 that has the following options:
-%   1 - moving average filter
-%   2 - gaussian filter
-% >additionalFilter is number between 1 and 3 that has the following options:
-%   1 - no additional filtering beyond chosen selection
-%   2 - low pass filter to keep percent chosen in percentCutoff
-%   3 - remove <percentCutoff>% of weakest amplitude frequencies from 
-%       frequency domain 
-% >percentCutoff is number between 0 and 1 that corresponds to percent kept
-% in low pass filter or percent of weakest frequencies removed for the
-% weakest amplitude removal filter
-% >LP_dB_Reduction refers to the attenuation performed by low pass filters, 
-% where dbReduction = -20 -> 0.1 gain,
-% >HPCO is the high pass cutoff frequency in Hz. Recomended value is
-% somewhere in ballpark of 100 Hz +/- 50 Hz to remove DC offset
 
 function [a, Fs] = test_functions(nameIn, len, mode, convState, windowSize, additionalFiltering, percentCutoff, LP_dB_Reduction, HPCO)
     [y,Fs] = audioread(nameIn);
