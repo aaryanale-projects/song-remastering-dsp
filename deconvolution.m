@@ -1,21 +1,36 @@
-% Deconvolution and Sound clarification
-% Filtering must be done nonlinearly as the noise completely overlap the frequencies
-% in the voice signal, both covering the range from 200 Hz to 3.2 kHz.
-% Two methods:
-%   - partially separate based on amplitudes and attenuate smaller
-%       irregular frequencies while keeping the few larger frequencies
-%   - Homomorphic: makes the problem become linear (converted to same
-%       structure as a linear system)
-%       >apply fourier transform to change convolution into multiplication
-%       >get input signal of form audio mutliplied by gain: a[]*g[]
-%       >input through logarithm (log(x*y) = log x + log y)
-%       >then apply linear filter to pass or reject frequencies
-%           (the gain signal g[] will be composed of very low frequencies so
-%           filtered out with high-pass filter)
-%       >invert back from log and ifft to get resulting a[] signal
-%       In general: a[] * g[] is converted to a[]
-
+% Deconvolution and Sound Enhancement
+%
+% Nonlinear filtering is required since the noise spectrum completely overlaps 
+% with that of the voice signal, both occupying the frequency range of approximately 
+% 200 Hz to 3.2 kHz.
+%
+% Two primary approaches can be used:
+%
+% 1. Amplitude-Based Partial Separation:
+%    - Partially distinguish components based on their amplitude levels.
+%    - Attenuate smaller, irregular frequency components (typically noise) 
+%      while retaining dominant frequency components (voice).
+%
+% 2. Homomorphic Filtering:
+%    - Transforms the nonlinear convolution problem into a linear one.
+%    - Steps involved:
+%        > Apply the Fourier Transform to convert convolution in time domain 
+%          into multiplication in the frequency domain.
+%        > Represent the signal as a product of the clean audio signal a[] 
+%          and a gain or distortion function g[].
+%        > Take the logarithm of the product: log(a[] * g[]) = log(a[]) + log(g[]).
+%        > Apply a linear filter to pass or reject specific frequencies. 
+%          (Since g[] mainly consists of low-frequency components, it can be 
+%           suppressed using a high-pass filter.)
+%        > Perform the inverse logarithm and inverse FFT (IFFT) to reconstruct 
+%          the enhanced audio signal a[].
+%
+%    In essence, this process converts a[] * g[] into a[] — effectively isolating 
+%    and restoring the desired clean signal.
+%
+% Reference:
 % https://www.mathworks.com/help/signal/ref/designfilt.html#mw_83b47e78-46c6-434f-8114-5f986269f98d
+
 
 function z = decon_function(nameIn,len,convState)
 
